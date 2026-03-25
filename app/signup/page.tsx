@@ -1,7 +1,8 @@
 'use client'
 import { useState } from "react"
-import { useFormStatus } from "react-dom";
 import Select from 'react-select'
+import { signup } from "../actions";
+import SubmitButton from "../components/SubmitButton";
 
 export default function SignupForm() {
     const [userType, setUserType] = useState('');
@@ -12,24 +13,30 @@ export default function SignupForm() {
         confirm_password: '',
         school: '',
         field: [] as string[],
-        graduation_year: '',
+        graduation_year: 2026, // not sure if I should keep this as default
         company: '',
         job_title: '',
         linkedin_url: '',
         subscribed: true,
     })
+    const [isPending, setIsPending] = useState(false);
 
     const handleSubmit = async (e: React.SubmitEvent) => {
-        e.preventDefault();
+        e.preventDefault()
+        setIsPending(true)
         console.log(formData)
+        await signup(formData)
+        setIsPending(false)
     }
 
+    // TODO - need to confirm password and check it is the same before submitting form data
     return (
         <div>
             <h1>Register With All-ASA!</h1>
             <p>Creating an All-ASA account allows you to register your ASA, apply for and post exclusive internship opportunities,
                 and apply to be a mentor or mentee in our signature Mentorship Program!
             </p>
+            <p>Have an account already? <a href="/login">Log In!</a></p>
             <form onSubmit={handleSubmit}>
                 <div>
                     {/* userType selection -- seems to correctly work for now */}
@@ -49,7 +56,7 @@ export default function SignupForm() {
                             <input
                                 id="name"
                                 type="text"
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                             />
                         </div>
                         <div>
@@ -57,7 +64,7 @@ export default function SignupForm() {
                             <input
                                 id="email"
                                 type="email"
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                             />
                         </div>
                         <div>
@@ -65,7 +72,7 @@ export default function SignupForm() {
                             <input
                                 id="password"
                                 type="password"
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                             />
                         </div>
                         <div>
@@ -105,7 +112,7 @@ export default function SignupForm() {
                                 <input
                                     id="graduation_year"
                                     type="number"
-                                    onChange={(e) => setFormData({ ...formData, graduation_year: e.target.value })}
+                                    onChange={(e) => setFormData({ ...formData, graduation_year: parseInt(e.target.value) })}
                                 />
                             </div>
                         </div>
@@ -143,19 +150,12 @@ export default function SignupForm() {
                         onChange={(e) => setFormData({ ...formData, subscribed: e.target.checked })}
                     />
                 </div>
-                <SubmitButton />
+                <SubmitButton
+                    isPending={isPending}
+                />
             </form >
 
         </div >
-    )
-}
-
-function SubmitButton() {
-    const { pending } = useFormStatus()
-    return (
-        <button type="submit" disabled={pending}>
-            {pending ? "Submitting ..." : "Submit"}
-        </button>
     )
 }
 
